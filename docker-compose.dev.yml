@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # Mock API Server - Giả lập ABC System APIs
+  mock-api:
+    build:
+      context: ./mock-api
+      dockerfile: Dockerfile
+    container_name: abc-mock-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - mcp-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # MCP Server - Kết nối tới Mock API
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-sse-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      # Server Config
+      - MCP_SERVER_HOST=0.0.0.0
+      - MCP_SERVER_PORT=3001
+      - MCP_SERVER_WORKERS=2  # Ít workers hơn cho dev
+
+      # ABC System Config - Point to Mock API
+      - ABC_SYSTEM_BASE_URL=http://mock-api:8000
+      - ABC_API_KEY=demo-api-key-12345
+      - ABC_TIMEOUT=30
+      - ABC_MAX_RETRIES=3
+      - ABC_RETRY_BACKOFF=1.0
+
+      # n8n Config (optional for demo)
+      - N8N_INSTANCE_URL=n8n-prod.iconiclogs.com
+      - N8N_API_KEY=demo-n8n-key
+      - N8N_WEBHOOK_PATH=mcp-system-check
+
+      # SSE Config
+      - SSE_HEARTBEAT_INTERVAL=30
+      - SSE_RECONNECT_TIMEOUT=5
+      - SSE_MAX_CONNECTIONS=50  # Ít connections hơn cho dev
+
+      # Logging
+      - LOG_LEVEL=DEBUG  # Debug mode cho dev
+      - LOG_FORMAT=json
+
+      # Environment
+      - ENVIRONMENT=development
+
+    depends_on:
+      mock-api:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - mcp-network
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mcp-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - mcp-network
+    depends_on:
+      - mcp-server
+
+  # Grafana - Metrics Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mcp-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - mcp-network
+    depends_on:
+      - prometheus
+
+networks:
+  mcp-network:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:

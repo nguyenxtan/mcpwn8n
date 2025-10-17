@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-sse-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      # Server Config
+      - MCP_SERVER_HOST=0.0.0.0
+      - MCP_SERVER_PORT=3001
+      - MCP_SERVER_WORKERS=4
+
+      # ABC System Config (override with your values)
+      - ABC_SYSTEM_BASE_URL=${ABC_SYSTEM_BASE_URL:-https://api.abc.com}
+      - ABC_API_KEY=${ABC_API_KEY}
+      - ABC_TIMEOUT=30
+      - ABC_MAX_RETRIES=3
+      - ABC_RETRY_BACKOFF=1.0
+
+      # n8n Config
+      - N8N_INSTANCE_URL=${N8N_INSTANCE_URL:-n8n-prod.iconiclogs.com}
+      - N8N_API_KEY=${N8N_API_KEY}
+      - N8N_WEBHOOK_PATH=mcp-system-check
+
+      # SSE Config
+      - SSE_HEARTBEAT_INTERVAL=30
+      - SSE_RECONNECT_TIMEOUT=5
+      - SSE_MAX_CONNECTIONS=100
+
+      # Logging
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+
+      # Environment
+      - ENVIRONMENT=production
+
+    volumes:
+      # Mount .env file for local development (optional)
+      - ./.env:/app/.env:ro
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+    networks:
+      - mcp-network
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mcp-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - mcp-network
+    depends_on:
+      - mcp-server
+
+  # Optional: Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mcp-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - mcp-network
+    depends_on:
+      - prometheus
+
+networks:
+  mcp-network:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:

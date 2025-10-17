@@ -1,0 +1,368 @@
+# MCP SSE Server - API Test Examples
+# Use with REST Client extension in VSCode or any HTTP client
+
+### Variables
+@baseUrl = http://localhost:3001
+@mockUrl = http://localhost:8000
+
+####################
+# Mock API Tests
+####################
+
+### 1. Mock API - Health Check
+GET {{mockUrl}}/api/system/health
+Content-Type: application/json
+
+### 2. Mock API - User Status
+GET {{mockUrl}}/api/users/status
+Content-Type: application/json
+
+### 3. Mock API - Services List
+GET {{mockUrl}}/api/services/list
+Content-Type: application/json
+
+### 4. Mock API - Query Logs (1 hour)
+POST {{mockUrl}}/api/logs/query
+Content-Type: application/json
+
+{
+  "timeframe": "1h",
+  "limit": 10
+}
+
+### 5. Mock API - Query Logs with Filters
+POST {{mockUrl}}/api/logs/query
+Content-Type: application/json
+
+{
+  "timeframe": "24h",
+  "level": "error",
+  "service": "api-gateway",
+  "limit": 20
+}
+
+### 6. Mock API - Current Metrics
+GET {{mockUrl}}/api/metrics/current
+Content-Type: application/json
+
+####################
+# MCP Server - Info
+####################
+
+### 7. MCP Server - Health Check
+GET {{baseUrl}}/health
+Content-Type: application/json
+
+### 8. MCP Server - Server Info
+GET {{baseUrl}}/info
+Content-Type: application/json
+
+### 9. MCP Server - List Tools
+GET {{baseUrl}}/tools
+Content-Type: application/json
+
+### 10. MCP Server - n8n Tools
+GET {{baseUrl}}/n8n/tools
+Content-Type: application/json
+
+### 11. MCP Server - Active Connections
+GET {{baseUrl}}/connections
+Content-Type: application/json
+
+### 12. MCP Server - Prometheus Metrics
+GET {{baseUrl}}/metrics
+
+####################
+# n8n Webhooks - Vietnamese
+####################
+
+### 13. System Check - Full (Vietnamese)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Kiểm tra toàn bộ hệ thống"
+  }
+}
+
+### 14. Check Logs - 24h (Vietnamese)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Xem logs 24h gần đây"
+  }
+}
+
+### 15. Check Users and Services (Vietnamese)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Kiểm tra user status và services"
+  }
+}
+
+### 16. Find Errors in Logs (Vietnamese)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Tìm lỗi trong logs 1 giờ qua"
+  }
+}
+
+### 17. Get Current Metrics (Vietnamese)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Lấy metrics hiện tại"
+  }
+}
+
+####################
+# n8n Webhooks - English
+####################
+
+### 18. System Check - Full (English)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Check all systems"
+  }
+}
+
+### 19. Get Recent Logs (English)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Get logs from last 24 hours"
+  }
+}
+
+### 20. Check User Status (English)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Check user status"
+  }
+}
+
+### 21. Check Services (English)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "List all services"
+  }
+}
+
+### 22. Get System Metrics (English)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Get current system metrics"
+  }
+}
+
+### 23. Search for Errors (English)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Search for errors in recent logs"
+  }
+}
+
+####################
+# n8n Webhooks - With Filters
+####################
+
+### 24. System Check with Filters
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Xem logs",
+    "filters": {
+      "log_timeframe": "24h",
+      "log_level": "error",
+      "log_service": "api-gateway"
+    }
+  }
+}
+
+### 25. Check Specific Service Logs
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Check logs for user-service",
+    "filters": {
+      "log_timeframe": "1h",
+      "log_service": "user-service"
+    }
+  }
+}
+
+### 26. Find Critical Errors
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Find critical errors",
+    "filters": {
+      "log_timeframe": "24h",
+      "log_level": "critical"
+    }
+  }
+}
+
+####################
+# Advanced Queries
+####################
+
+### 27. Combined Check - Health + Metrics
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Kiểm tra health và metrics"
+  }
+}
+
+### 28. Performance Check
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Check system performance"
+  }
+}
+
+### 29. Full System Overview
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Give me complete system overview"
+  }
+}
+
+### 30. Service Health Check
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "Are all services running?"
+  }
+}
+
+####################
+# Edge Cases
+####################
+
+### 31. Empty Query (should default to health)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": ""
+  }
+}
+
+### 32. Unknown Tool (should return error)
+POST {{baseUrl}}/n8n/webhook/demo
+Content-Type: application/json
+
+{
+  "tool": "unknown_tool",
+  "params": {
+    "query": "test"
+  }
+}
+
+### 33. Invalid Webhook ID (should return error)
+POST {{baseUrl}}/n8n/webhook/invalid-id-123
+Content-Type: application/json
+
+{
+  "tool": "check_system_abc",
+  "params": {
+    "query": "test"
+  }
+}
+
+####################
+# Health Checks (K8s)
+####################
+
+### 34. Liveness Probe
+GET {{baseUrl}}/health/live
+
+### 35. Readiness Probe
+GET {{baseUrl}}/health/ready
+
+####################
+# Notes
+####################
+
+# How to use:
+# 1. Start demo: ./demo-start.sh
+# 2. Install VSCode REST Client extension
+# 3. Click "Send Request" above each ### line
+# 4. Or copy-paste to Postman/Insomnia
+
+# Expected Results:
+# - Mock API calls: Return mock data
+# - MCP Server info: Return server status
+# - n8n webhooks: Return system check results
+# - All should return 200 OK (except error cases)
+
+# Tips:
+# - Use jq to format JSON: curl ... | jq
+# - Check logs: docker-compose -f docker-compose.dev.yml logs -f
+# - Monitor metrics: http://localhost:9090
