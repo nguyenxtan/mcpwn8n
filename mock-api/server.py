@@ -5,7 +5,7 @@ Dùng để demo và testing mà không cần API thật
 import random
 import time
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,9 +31,9 @@ app.add_middleware(
 
 class LogQueryRequest(BaseModel):
     timeframe: str = "1h"
-    level: str | None = None
-    service: str | None = None
-    search: str | None = None
+    level: Optional[str] = None
+    service: Optional[str] = None
+    search: Optional[str] = None
     limit: int = 100
 
 
