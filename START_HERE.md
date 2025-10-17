@@ -8,6 +8,17 @@
 
 ## 🎯 Bạn muốn làm gì?
 
+### 🚀 Deploy lên Ubuntu server → [DEPLOY_QUICK.md](DEPLOY_QUICK.md)
+
+**Nếu bạn muốn:**
+- ✅ Deploy production lên Ubuntu server
+- ✅ Dùng với aaPanel
+- ✅ Setup trong 5 phút
+
+**👉 Xem:** [DEPLOY_QUICK.md](DEPLOY_QUICK.md) hoặc [DEPLOY_UBUNTU.md](DEPLOY_UBUNTU.md) (chi tiết)
+
+---
+
 ### 1️⃣ Chạy demo ngay (5 phút) → [QUICKSTART.md](QUICKSTART.md)
 
 **Nếu bạn muốn:**
